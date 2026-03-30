@@ -20,7 +20,8 @@ export default function Navbar({ open, setOpen }: any) {
 
   return (
     <>
-      <header
+      <header 
+        id="navbar"
         className={cn(
           "fixed top-0 left-0 right-0 z-[9000] transition-all duration-500 border-b",
           scrolled

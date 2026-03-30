@@ -1,11 +1,21 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Typewriter } from "react-simple-typewriter";
 
 export default function Hero() {
+  useEffect(() => {
+    const nav = document.getElementById("navbar")
+    if(nav){
+      const height = nav.offsetHeight;
+      document.documentElement.style.setProperty("--nav-height", `${height + 20}px`);
+    }
+  }, []);
   return (
-    <section className="relative min-h-screen flex items-center pt-24">
+    <section className="relative min-h-screen flex items-start justify-center" 
+        style={{paddingTop: "var(--nav-height, 50px"}}
+    >
       <div className="max-w-6xl mx-auto px-6 md:px-12 w-full">
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start mt-10 md:mt-16">
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -88,6 +98,15 @@ export default function Hero() {
 
         </div>
       </div>
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+      <motion.div
+        className="absolute bottom-10 left-0 w-full flex flex-col items-center text-muted-dim"
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+      >
+        <span className="text-[10px] tracking-widest">SCROLL</span>
+        <span className="text-lg mt-1">↓</span>
+      </motion.div>
     </section>
   );
 }
