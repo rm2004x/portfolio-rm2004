@@ -55,27 +55,6 @@ export default function App() {
     }
     window.scrollTo(0, 0);
   }, []);
-
-  useEffect(() => {
-    
-    const block = (e: KeyboardEvent) => {
-      const c = e.ctrlKey || e.metaKey;
-      if (
-        (c && (e.key === "u" || e.key === "U")) ||
-        (c && (e.key === "s" || e.key === "S")) ||
-        (c && e.shiftKey && ["i","I","j","J","c","C"].includes(e.key)) ||
-        e.key === "F12"
-      ) e.preventDefault();
-    };
-    const noCtx = (e: MouseEvent) => e.preventDefault();
-    document.addEventListener("keydown", block);
-    document.addEventListener("contextmenu", noCtx);
-    return () => {
-      document.removeEventListener("keydown", block);
-      document.removeEventListener("contextmenu", noCtx);
-    };
-  }, []);
-
   return (
     <ErrorBoundary>
       <TooltipProvider>
