@@ -1,76 +1,100 @@
-import { useEffect, useState } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useEffect, useRef } from "react";
 
 export default function CustomCursor() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { damping: 25, stiffness: 300, mass: 0.5 };
-  const cursorX = useSpring(mouseX, springConfig);
-  const cursorY = useSpring(mouseY, springConfig);
-
-  const ringConfig = { damping: 30, stiffness: 150, mass: 0.8 };
-  const ringX = useSpring(mouseX, ringConfig);
-  const ringY = useSpring(mouseY, ringConfig);
+  const dotRef  = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const cur = useRef({ x: -300, y: -300 });
+  const lag = useRef({ x: -300, y: -300 });
+  const raf = useRef(0);
+  const st  = useRef({ visible: false, hover: false, click: false });
 
   useEffect(() => {
-    const updateMousePosition = (e: MouseEvent) => {
-      if (!isVisible) setIsVisible(true);
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-    };
+    if (window.matchMedia("(hover:none) and (pointer:coarse)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion:reduce)").matches) return;
 
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName.toLowerCase() === "a" ||
-        target.tagName.toLowerCase() === "button" ||
-        target.closest("a") ||
-        target.closest("button")
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
-    };
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-    window.addEventListener("mousemove", updateMousePosition);
-    window.addEventListener("mouseover", handleMouseOver);
+    const onMove = (e: MouseEvent) => {
+      cur.current = { x: e.clientX, y: e.clientY };
+      st.current.visible = true;
+    };
+    const onOver = (e: MouseEvent) => {
+      const t = e.target as HTMLElement;
+      st.current.hover = !!(
+        t.closest("a,button,[role='button'],input,textarea,label,select")
+      );
+    };
+    const onDown  = () => { st.current.click = true; };
+    const onUp    = () => { st.current.click = false; };
+    const onLeave = () => { st.current.visible = false; };
+    const onEnter = () => { st.current.visible = true; };
+
+    window.addEventListener("mousemove",  onMove,  { passive: true });
+    window.addEventListener("mouseover",  onOver,  { passive: true });
+    window.addEventListener("mousedown",  onDown,  { passive: true });
+    window.addEventListener("mouseup",    onUp,    { passive: true });
+    document.documentElement.addEventListener("mouseleave", onLeave);
+    document.documentElement.addEventListener("mouseenter", onEnter);
+
+    const tick = () => {
+      raf.current = requestAnimationFrame(tick);
+      const dot  = dotRef.current;
+      const ring = ringRef.current;
+      if (!dot || !ring) return;
+
+      lag.current.x = lerp(lag.current.x, cur.current.x, 0.11);
+      lag.current.y = lerp(lag.current.y, cur.current.y, 0.11);
+
+      const { visible, hover, click } = st.current;
+      const dotScale  = click ? 0.35 : 1;
+      const ringScale = click ? 0.7 : hover ? 1.65 : 1;
+
+      dot.style.opacity    = visible && !hover ? "1" : "0";
+      dot.style.transform  = `translate(${cur.current.x - 4}px,${cur.current.y - 4}px) scale(${dotScale})`;
+      ring.style.opacity   = visible ? "1" : "0";
+      ring.style.transform = `translate(${lag.current.x - 17}px,${lag.current.y - 17}px) scale(${ringScale})`;
+      ring.style.background = hover ? "rgba(201,169,110,0.09)" : "transparent";
+    };
+    raf.current = requestAnimationFrame(tick);
 
     return () => {
-      window.removeEventListener("mousemove", updateMousePosition);
-      window.removeEventListener("mouseover", handleMouseOver);
+      cancelAnimationFrame(raf.current);
+      window.removeEventListener("mousemove",  onMove);
+      window.removeEventListener("mouseover",  onOver);
+      window.removeEventListener("mousedown",  onDown);
+      window.removeEventListener("mouseup",    onUp);
+      document.documentElement.removeEventListener("mouseleave", onLeave);
+      document.documentElement.removeEventListener("mouseenter", onEnter);
     };
-  }, [mouseX, mouseY, isVisible]);
-
-  if (!isVisible || typeof window === "undefined" || window.innerWidth < 768) return null;
+  }, []);
 
   return (
     <>
-      
-      <motion.div
-        className="fixed top-0 left-0 w-2 h-2 bg-gold rounded-full pointer-events-none z-[9999] mix-blend-difference"
+      <div
+        ref={dotRef}
+        aria-hidden
         style={{
-          x: cursorX,
-          y: cursorY,
-          translateX: "-50%",
-          translateY: "-50%",
-          scale: isHovering ? 0 : 1,
+          position: "fixed", inset: 0, top: 0, left: 0,
+          width: 8, height: 8, borderRadius: "50%",
+          background: "var(--gold)",
+          pointerEvents: "none", zIndex: 99999,
+          opacity: 0,
+          mixBlendMode: "difference",
+          willChange: "transform, opacity",
+          transition: "opacity 0.12s ease, transform 0.08s ease",
         }}
       />
-      
-      <motion.div
-        className="fixed top-0 left-0 w-8 h-8 border border-gold/50 rounded-full pointer-events-none z-[9998]"
+      <div
+        ref={ringRef}
+        aria-hidden
         style={{
-          x: ringX,
-          y: ringY,
-          translateX: "-50%",
-          translateY: "-50%",
-          scale: isHovering ? 1.5 : 1,
-          backgroundColor: isHovering ? "rgba(201, 169, 110, 0.1)" : "transparent",
+          position: "fixed", inset: 0, top: 0, left: 0,
+          width: 34, height: 34, borderRadius: "50%",
+          border: "1px solid rgba(201,169,110,0.55)",
+          pointerEvents: "none", zIndex: 99998,
+          opacity: 0,
+          willChange: "transform, opacity",
+          transition: "background 0.22s ease, opacity 0.12s ease, transform 0.32s cubic-bezier(0.22,1,0.36,1)",
         }}
       />
     </>

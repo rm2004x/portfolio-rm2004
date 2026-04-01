@@ -1,28 +1,42 @@
-import { motion } from "framer-motion";
-
-const TECH_KEYWORDS = [
+const ITEMS = [
   "Full Stack Development", "React.js", "Node.js", "Java",
-  "Data Structures", "Algorithms", "DBMS", "MySQL", 
-  "C Programming", "rm2004", "Open to Work"
+  "Data Structures", "Algorithms", "DBMS", "MySQL",
+  "C Programming", "rm2004", "Open to Work",
 ];
+
+function Row() {
+  return (
+    <>
+      {ITEMS.map((item, i) => (
+        <span key={i} className="flex items-center shrink-0" style={{ gap: "2.5rem" }}>
+          <span
+            className="font-mono uppercase text-[--muted-dim] whitespace-nowrap"
+            style={{ fontSize: "0.6rem", letterSpacing: "0.2em" }}
+          >
+            {item}
+          </span>
+          <span style={{ color: "var(--gold)", fontSize: "0.65rem", opacity: 0.5 }} aria-hidden>✦</span>
+        </span>
+      ))}
+    </>
+  );
+}
 
 export default function Ticker() {
   return (
-    <div className="py-8 bg-surface border-y border-border overflow-hidden flex whitespace-nowrap">
-      <motion.div
-        className="flex gap-12 items-center"
-        animate={{ x: [0, -1035] }}
-        transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+    <div
+      className="ticker-wrap"
+      aria-label="Technology skills"
+      role="marquee"
+    >
+      <div
+        className="ticker-track"
+        style={{ paddingInline: "2.5rem", gap: "2.5rem" }}
+        aria-hidden
       >
-        {[...TECH_KEYWORDS, ...TECH_KEYWORDS, ...TECH_KEYWORDS].map((tech, i) => (
-          <div key={i} className="flex items-center gap-12">
-            <span className="font-mono text-xs uppercase tracking-widest text-muted-dim whitespace-nowrap">
-              {tech}
-            </span>
-            <span className="text-gold text-xs">✦</span>
-          </div>
-        ))}
-      </motion.div>
+        <Row />
+        <Row />
+      </div>
     </div>
   );
 }

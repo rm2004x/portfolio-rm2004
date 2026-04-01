@@ -1,112 +1,94 @@
-import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Typewriter } from "react-simple-typewriter";
+import UltraScene from "@/components/hero/UltraScene";
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
-    const nav = document.getElementById("navbar")
-    if(nav){
-      const height = nav.offsetHeight;
-      document.documentElement.style.setProperty("--nav-height", `${height + 20}px`);
-    }
+    const nav = document.getElementById("navbar");
+    if (!nav) return;
+    const sync = () =>
+      document.documentElement.style.setProperty("--nav-h", `${nav.offsetHeight}px`);
+    const ro = new ResizeObserver(sync);
+    ro.observe(nav);
+    sync();
+    return () => ro.disconnect();
   }, []);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const gridY = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
+
   return (
-    <section className="relative min-h-screen flex items-start justify-center" 
-        style={{paddingTop: "var(--nav-height, 50px"}}
-    >
-      <div className="max-w-6xl mx-auto px-6 md:px-12 w-full">
-        <div className="flex flex-col items-start mt-10 md:mt-16">
+    <section ref={sectionRef} id="hero" className="hero">
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.3em] text-gold mb-6 block">
-              Hi, my name is
+      <motion.div className="hero-grid-bg" style={{ y: gridY }} />
+
+      <div className="hero-layout">
+
+        <motion.div
+          className="hero-text"
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <p className="hero-eyebrow">Hi, My Name is</p>
+
+          <h1 className="hero-title">
+            Rudranil
+            <br />
+            <span className="hero-title-dim">
+              Manna<span style={{ color: "var(--gold)" }}>.</span>
             </span>
-          </motion.div>
+          </h1>
 
-          <motion.h1
-            className="font-serif text-5xl md:text-7xl lg:text-[8rem] leading-[0.9] tracking-tight text-foreground mb-4"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            Rudranil <br />
-            <span className="font-light text-foreground/70">
-              Manna<span className="text-gold">.</span>
-            </span>
-          </motion.h1>
-
-          <motion.div
-            className="font-serif text-xl md:text-3xl text-muted-dim mt-6 h-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
+          <div className="hero-typewriter">
             <Typewriter
               words={[
                 "Full Stack Developer",
-                "Java Developer",
-                "Problem Solver",
-                "Web Engineer",
+                "Java Specialist",
+                "Backend Engineer",
+                "UI Craftsman",
+                "System Architect",
               ]}
-              loop={true}
+              loop
               cursor
-              cursorStyle="|"
-              typeSpeed={70}
-              deleteSpeed={50}
-              delaySpeed={2000}
+              cursorStyle="_"
+              typeSpeed={55}
+              deleteSpeed={30}
+              delaySpeed={2200}
             />
-          </motion.div>
+          </div>
 
-          <motion.p
-            className="mt-8 max-w-lg text-muted text-sm md:text-base leading-relaxed font-sans font-light"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-          >
-            I craft elegant, high-performance digital experiences. Specializing in modern web technologies 
-            and complex system architectures, transforming bold ideas into functional, beautiful realities.
-          </motion.p>
+          <p className="hero-bio">
+            I craft elegant, high-performance digital experiences. Specializing in modern web technologies and complex 
+            system architectures, transforming bold ideas into functional, beautiful realities.
+          </p>
 
-          <motion.div
-            className="mt-10 flex flex-wrap gap-5"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
-          >
-            <a
-              href="#work"
-              className="group relative px-7 py-3 bg-foreground text-background font-mono text-xs uppercase tracking-widest overflow-hidden hover:text-background transition-colors"
-            >
-              <span className="relative z-10">View Work</span>
-              <div className="absolute inset-0 bg-gold translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]" />
+          <div className="hero-cta">
+            <a href="#work" className="btn-fill">
+              <span>View Work</span>
             </a>
-
-            <a
-              href="#contact"
-              className="group px-7 py-3 border border-border text-foreground font-mono text-xs uppercase tracking-widest hover:border-gold hover:text-gold transition-colors flex items-center gap-3"
-            >
-              Get in touch
-              <span className="group-hover:translate-x-1 transition-transform duration-300">
-                →
-              </span>
+            <a href="#contact" className="btn-ghost">
+              <span>Let's Talk →</span>
             </a>
-          </motion.div>
+          </div>
+        </motion.div>
 
-        </div>
+        <motion.div
+          className="hero-orbit-col"
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <UltraScene />
+        </motion.div>
+
       </div>
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-      <motion.div
-        className="absolute bottom-10 left-0 w-full flex flex-col items-center text-muted-dim"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-      >
-        <span className="text-[10px] tracking-widest">SCROLL</span>
-        <span className="text-lg mt-1">↓</span>
-      </motion.div>
     </section>
   );
 }

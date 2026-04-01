@@ -1,160 +1,122 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+
+const FACTS = [
+  { value: "2+",   label: "Years of\nCoding"          },
+  { value: "10+",  label: "Projects\nCompleted"        },
+  { value: "4+",   label: "Technologies\nMastered"     },
+  { value: "B.Tech", label: "CSE  Data\nScience"       },
+];
+
+const fadeUp = (delay = 0) => ({
+  hidden: { opacity: 0, y: 24 },
+  show:   { opacity: 1, y: 0,  transition: { duration: 0.72, delay, ease: [0.22,1,0.36,1] } },
+});
 
 export default function About() {
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0,1], ["-8%","8%"]);
+
   return (
-    <section id="about" className="py-28">
-      <div className="max-w-6xl mx-auto px-6 md:px-12">
+    <section id="about" ref={ref} className="sec-py relative overflow-hidden border-b border-[--border]">
 
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-        >
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{ y: bgY }}
+        aria-hidden
+      >
+        <div
+          className="absolute top-0 right-[-10%] w-[55vw] h-[55vw] rounded-full opacity-[0.045]"
+          style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", maxWidth: 600, maxHeight: 600 }}
+        />
+      </motion.div>
 
-          <div className="flex items-center gap-6 mb-14">
-            <span className="font-mono text-[10px] tracking-[0.2em] text-gold uppercase">
-              01 — About
-            </span>
-            <div className="h-[1px] bg-border flex-1 max-w-[180px]" />
-          </div>
+      <div className="inner relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[--gap] items-start">
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10">
-
-            <div className="lg:col-span-7">
-              <h2 className="font-serif text-3xl md:text-5xl text-foreground mb-6">
-                The person behind the{" "}
-                <span className="italic text-gold">code.</span>
-              </h2>
-
-              <div className="space-y-5 text-muted font-sans font-light leading-relaxed max-w-xl">
-                <p>
-                  I am Rudranil Manna, a passionate software developer based in West Bengal, India. 
-                  My journey in tech began with a deep curiosity about how systems work under the hood, 
-                  which naturally evolved into a focused pursuit of web engineering and system architecture.
-                </p>
-
-                <p>
-                  I bridge the gap between complex backend logic and intuitive user interfaces. Whether I'm 
-                  optimizing a database query or crafting a fluid React component, my goal is always to deliver 
-                  performant, scalable, and beautifully engineered solutions.
-                </p>
-
-                <p>
-                  When I'm not pushing code, you can find me solving algorithmic puzzles to sharpen my logic, 
-                  exploring new open-source technologies, or refining my design sensibilities.
-                </p>
-              </div>
-
-              <div className="mt-10 grid grid-cols-3 gap-6 pt-6 border-t border-border max-w-lg">
-                <div>
-                  <div className="font-serif text-3xl text-foreground mb-1">
-                    50<span className="text-gold">+</span>
-                  </div>
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-dim">
-                    DSA Problems
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-serif text-3xl text-foreground mb-1">
-                    4<span className="text-gold">+</span>
-                  </div>
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-dim">
-                    Projects Built
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-serif text-3xl text-foreground mb-1">
-                    2<span className="text-gold">+</span>
-                  </div>
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-dim">
-                    Years Coding
-                  </div>
-                </div>
-              </div>
+          <motion.div
+            variants={fadeUp(0)}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+          >
+            <div className="label-row">
+              <span className="label-tag">01 — About</span>
+              <div className="label-line" />
             </div>
 
-            <div className="lg:col-span-5">
-              <div className="glass-panel p-6 md:p-8 max-w-md lg:ml-auto">
-                <h3 className="font-mono text-xs uppercase tracking-widest text-foreground mb-6 border-b border-border pb-3">
-                  Fast Facts
-                </h3>
+            <h2
+              className="font-serif text-[--fg] mb-5"
+              style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}
+            >
+              Building things <span className="italic text-[--muted]">that matter.</span>
+            </h2>
 
-                <ul className="space-y-5">
-                  <li className="flex flex-col gap-1">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-dim">
-                      Location
-                    </span>
-                    <span className="font-sans text-sm text-foreground">
-                      Tamluk, West Bengal, India
-                    </span>
-                  </li>
-
-                  <li className="flex flex-col gap-1">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-dim">
-                      Role
-                    </span>
-                    <span className="font-sans text-sm text-foreground">
-                      Full Stack Developer
-                    </span>
-                  </li>
-
-                  <li className="flex flex-col gap-1">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-dim">
-                      Focus
-                    </span>
-                    <span className="font-sans text-sm text-foreground">
-                      Web Dev & System Design
-                    </span>
-                  </li>
-
-                  <li className="flex flex-col gap-1">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-dim">
-                      GitHub
-                    </span>
-                    <a
-                      href=""
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-sans text-sm text-gold hover:underline"
-                    >
-                      {/* github.com/rm2004x */}
-                    </a>
-                  </li>
-
-                  <li className="flex flex-col gap-1">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-dim">
-                      LeetCode
-                    </span>
-                    <a
-                      href=""
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-sans text-sm text-gold hover:underline"
-                    >
-                      {/* leetcode.com/rm2004 */}
-                    </a>
-                  </li>
-
-                  <li className="flex flex-col gap-1 pt-3 border-t border-border mt-2">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-dim">
-                      Status
-                    </span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                      <span className="font-sans text-sm text-success">
-                        Open to Opportunities
-                      </span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+            <div
+              className="font-sans text-[--muted] font-light space-y-4"
+              style={{ fontSize: "clamp(0.875rem, 1.1vw, 1rem)", lineHeight: 1.8, maxWidth: 480 }}
+            >
+              <p>
+                I'm Rudranil — a Computer Science undergraduate ,
+                specialising in Data Science. I build full-stack web applications and
+                deeply enjoy solving complex engineering problems.
+              </p>
+              <p>
+                My approach blends rigorous CS fundamentals — algorithms, data structures,
+                OOP — with modern frontend craft. I care about performance, clean code,
+                and the fine details that separate good products from great ones.
+              </p>
+              <p>
+                Currently seeking internship and entry-level engineering roles.
+                Open to remote and on-site opportunities.
+              </p>
             </div>
 
-          </div>
-        </motion.div>
+            <div className="mt-8 inline-flex items-center gap-2.5 px-4 py-2.5 border border-[--border] bg-[--surface]">
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ background: "#4ade80", boxShadow: "0 0 8px #4ade80aa" }}
+              />
+              <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-[--muted-dim]">
+                Available for work
+              </span>
+            </div>
+          </motion.div>
+
+          <motion.div
+            variants={fadeUp(0.12)}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            className="grid grid-cols-2 gap-4 lg:mt-16"
+          >
+            {FACTS.map((f, i) => (
+              <motion.div
+                key={f.label}
+                className="glass p-5 flex flex-col items-center text-center lg:items-start lg:text-left"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.6, delay: 0.08 * i, ease: [0.22,1,0.36,1] }}
+              >
+                <span
+                  className="font-serif text-[--gold] leading-none mb-2 block"
+                  style={{ fontSize: "clamp(2rem, 4vw, 2.8rem)" }}
+                >
+                  {f.value}
+                </span>
+                <span
+                  className="font-mono text-[--muted-dim] uppercase tracking-[0.14em] leading-snug"
+                  style={{ fontSize: "0.575rem", whiteSpace: "pre-line" }}
+                >
+                  {f.label}
+                </span>
+              </motion.div>
+            ))}
+          </motion.div>
+
+        </div>
       </div>
     </section>
   );

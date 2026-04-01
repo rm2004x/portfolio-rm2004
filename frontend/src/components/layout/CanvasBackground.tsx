@@ -6,100 +6,94 @@ export default function CanvasBackground() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationFrameId: number;
-    let particles: Particle[] = [];
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let rafId: number;
+    let w = 0, h = 0;
+    let paused = false;
+
+    type P = { x: number; y: number; vx: number; vy: number; r: number };
+    let particles: P[] = [];
+
+    const build = () => {
+      const count = Math.min(Math.floor(w / 20), 80);
+      particles = Array.from({ length: count }, () => ({
+        x:  Math.random() * w,
+        y:  Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        r:  Math.random() * 0.9 + 0.3,
+      }));
+    };
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      w = canvas.width  = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      build();
     };
 
-    class Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      radius: number;
+    let timer: ReturnType<typeof setTimeout>;
+    const onResize = () => { clearTimeout(timer); timer = setTimeout(resize, 140); };
+    const onVis    = () => { paused = document.hidden; };
 
-      constructor() {
-        this.x = Math.random() * canvas!.width;
-        this.y = Math.random() * canvas!.height;
-        this.vx = (Math.random() - 0.5) * 0.3;
-        this.vy = (Math.random() - 0.5) * 0.3;
-        this.radius = Math.random() * 1.2;
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-
-        if (this.x < 0 || this.x > canvas!.width) this.vx = -this.vx;
-        if (this.y < 0 || this.y > canvas!.height) this.vy = -this.vy;
-      }
-
-      draw() {
-        ctx!.beginPath();
-        ctx!.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx!.fillStyle = "rgba(201, 169, 110, 0.4)";
-        ctx!.fill();
-      }
-    }
-
-    const init = () => {
-      resize();
-      particles = [];
-      const particleCount = Math.floor(window.innerWidth / 15);
-      for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
-      }
-    };
-
+    const DIST = 100;
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      rafId = requestAnimationFrame(animate);
+      if (paused) return;
 
-      particles.forEach((particle) => {
-        particle.update();
-        particle.draw();
-      });
+      ctx.clearRect(0, 0, w, h);
+
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > w) p.vx = -p.vx;
+        if (p.y < 0 || p.y > h) p.vy = -p.vy;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(201,169,110,0.30)";
+        ctx.fill();
+      }
 
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 100) {
+          const d2 = dx * dx + dy * dy;
+          if (d2 < DIST * DIST) {
+            const d = Math.sqrt(d2);
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(201, 169, 110, ${0.15 * (1 - distance / 100)})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(201,169,110,${0.10 * (1 - d / DIST)})`;
+            ctx.lineWidth   = 0.35;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.stroke();
           }
         }
       }
-
-      animationFrameId = requestAnimationFrame(animate);
     };
 
-    window.addEventListener("resize", init);
-    init();
+    window.addEventListener("resize", onResize, { passive: true });
+    document.addEventListener("visibilitychange", onVis);
+    resize();
     animate();
 
     return () => {
-      window.removeEventListener("resize", init);
-      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVis);
+      cancelAnimationFrame(rafId);
+      clearTimeout(timer);
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[-1] opacity-60"
+      aria-hidden
+      className="fixed inset-0 pointer-events-none z-[-1]"
+      style={{ opacity: 0.5 }}
     />
   );
 }
